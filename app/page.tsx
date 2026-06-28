@@ -10,6 +10,7 @@ import { Sidebar } from "@/components/portfolio/Sidebar";
 import { imageEntries, type ImageEntry } from "@/data/images";
 import { projects, type ProjectId } from "@/data/projects";
 
+
 export default function Home() {
   const [introComplete, setIntroComplete] = useState(false);
   const [activeProject, setActiveProject] = useState<ProjectId>(projects[0].id);

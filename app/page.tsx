@@ -1,83 +1,19 @@
 "use client";
 
-/* eslint-disable @next/next/no-img-element -- The masonry grid needs each AVIF's intrinsic rendered height. */
+import { LayoutGroup } from "motion/react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
-import Link from "next/link";
-import { AnimatePresence, LayoutGroup, motion } from "motion/react";
-import { useEffect, useMemo, useRef, useState } from "react";
-
-type ProjectId = "field-notes" | "quiet-rooms" | "surface-studies" | "after-light";
-
-type ImageEntry = {
-  id: string;
-  src: string;
-  alt: string;
-  project: ProjectId;
-  date: string;
-  place: string;
-  medium: string;
-  note: string;
-};
-
-const projects: Array<{ id: ProjectId; title: string; description: string }> = [
-  {
-    id: "field-notes",
-    title: "Field Note",
-    description: "Open landscapes, fragments, and quiet exterior studies.",
-  },
-  {
-    id: "quiet-rooms",
-    title: "Quiet Rooms",
-    description: "Interior images, held light, and domestic thresholds.",
-  },
-  {
-    id: "surface-studies",
-    title: "Surface Studies",
-    description: "Texture, material memory, and small details in close view.",
-  },
-  {
-    id: "after-light",
-    title: "After Light",
-    description: "Late-day color, shadow, and softened edges.",
-  },
-];
-
-const imageEntries: ImageEntry[] = [
-  {
-    id: "hero",
-    src: "/images/hero.avif",
-    alt: "Portfolio hero image",
-    project: "field-notes",
-    date: "2026",
-    place: "Archive",
-    medium: "Digital photograph",
-    note: "Opening image and first piece in the grid.",
-  },
-  ...Array.from({ length: 26 }, (_, index) => {
-    const project = projects[Math.floor(index / 7)]?.id ?? "after-light";
-    const number = String(index).padStart(2, "0");
-
-    return {
-      id: `art-${number}`,
-      src: `/images/art/art-${number}.avif`,
-      alt: `Artwork ${number}`,
-      project,
-      date: `202${index % 6}`,
-      place: ["Berlin", "Paris", "Marrakesh", "Lisbon"][index % 4],
-      medium: index % 3 === 0 ? "35mm scan" : "Digital photograph",
-      note: ["Color study", "Location study", "Light study", "Material study"][
-        index % 4
-      ],
-    };
-  }),
-];
-
-const brandName = "Tamara Pio Zebouni";
+import { ImageViewer } from "@/components/portfolio/ImageViewer";
+import { IntroOverlay } from "@/components/portfolio/IntroOverlay";
+import { ProjectGallery } from "@/components/portfolio/ProjectGallery";
+import { Sidebar } from "@/components/portfolio/Sidebar";
+import { imageEntries, type ImageEntry } from "@/data/images";
+import { projects, type ProjectId } from "@/data/projects";
 
 export default function Home() {
   const [introComplete, setIntroComplete] = useState(false);
   const [activeProject, setActiveProject] = useState<ProjectId>(projects[0].id);
-  const [selectedImage, setSelectedImage] = useState<ImageEntry | null>(null);
+  const [selectedImageIndex, setSelectedImageIndex] = useState<number | null>(null);
   const sectionRefs = useRef<Record<ProjectId, HTMLElement | null>>({
     "field-notes": null,
     "quiet-rooms": null,
@@ -91,6 +27,17 @@ export default function Home() {
         ...project,
         images: imageEntries.filter((image) => image.project === project.id),
       })),
+    [],
+  );
+  const selectedImage =
+    selectedImageIndex === null ? null : imageEntries[selectedImageIndex];
+  const selectedImageNumber =
+    selectedImageIndex === null ? 0 : selectedImageIndex + 1;
+
+  const setSectionRef = useCallback(
+    (projectId: ProjectId, node: HTMLElement | null) => {
+      sectionRefs.current[projectId] = node;
+    },
     [],
   );
 
@@ -124,74 +71,58 @@ export default function Home() {
     return () => observer.disconnect();
   }, [introComplete]);
 
-  const scrollToProject = (projectId: ProjectId) => {
-    setSelectedImage(null);
+  const scrollToProject = useCallback((projectId: ProjectId) => {
+    setSelectedImageIndex(null);
     sectionRefs.current[projectId]?.scrollIntoView({ block: "start" });
-  };
+  }, []);
+
+  const openImage = useCallback((image: ImageEntry) => {
+    const imageIndex = imageEntries.findIndex((entry) => entry.id === image.id);
+
+    if (imageIndex >= 0) setSelectedImageIndex(imageIndex);
+  }, []);
+
+  const showPreviousImage = useCallback(() => {
+    setSelectedImageIndex((currentIndex) =>
+      currentIndex === null
+        ? null
+        : (currentIndex - 1 + imageEntries.length) % imageEntries.length,
+    );
+  }, []);
+
+  const showNextImage = useCallback(() => {
+    setSelectedImageIndex((currentIndex) =>
+      currentIndex === null ? null : (currentIndex + 1) % imageEntries.length,
+    );
+  }, []);
+
+  const closeImage = useCallback(() => setSelectedImageIndex(null), []);
 
   return (
     <LayoutGroup>
-      <main className="min-h-screen bg-white text-stone-950">
-        <div className="grid min-h-screen grid-cols-1 gap-5 px-5 py-5 lg:grid-cols-[minmax(0,2fr)_minmax(18rem,1fr)] lg:gap-10 lg:px-8">
+      <main className="min-h-screen bg-background text-stone-950">
+        <div className="grid min-h-screen grid-cols-1 gap-5 px-5 py-5 lg:grid-cols-[minmax(0,1fr)_minmax(11rem,15rem)] lg:gap-8 lg:px-8">
           {selectedImage ? (
             <ImageViewer
               image={selectedImage}
+              imageNumber={selectedImageNumber}
+              totalImages={imageEntries.length}
               projectTitle={
                 projects.find((project) => project.id === selectedImage.project)
                   ?.title ?? "Project"
               }
-              onClose={() => setSelectedImage(null)}
+              onPrevious={showPreviousImage}
+              onNext={showNextImage}
+              onClose={closeImage}
             />
           ) : (
             <>
-              <section aria-label="Image projects" className="min-w-0">
-                {groupedImages.map((project) => (
-                  <section
-                    id={project.id}
-                    key={project.id}
-                    ref={(node) => {
-                      sectionRefs.current[project.id] = node;
-                    }}
-                    className="scroll-mt-5 pb-14"
-                  >
-                    <div className="mb-5 border-t border-stone-950 pt-3">
-                      <h2 className="text-[clamp(2.25rem,7vw,7rem)] leading-[0.86] tracking-[-0.06em]">
-                        {project.title}
-                      </h2>
-                      <p className="mt-3 max-w-xl text-lg italic leading-snug text-stone-600">
-                        {project.description}
-                      </p>
-                    </div>
-                    <div className="columns-1 gap-5 md:columns-2 *:mb-5">
-                      {project.images.map((image) => (
-                        <button
-                          key={image.id}
-                          type="button"
-                          onClick={() => setSelectedImage(image)}
-                          className="block w-full break-inside-avoid text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-stone-950 focus-visible:ring-offset-4"
-                          aria-label={`Open ${image.alt}`}
-                        >
-                          {image.id === "hero" && introComplete ? (
-                            <motion.img
-                              layoutId="hero-image"
-                              src={image.src}
-                              alt={image.alt}
-                              className="h-auto w-full"
-                            />
-                          ) : (
-                            <img
-                              src={image.src}
-                              alt={image.alt}
-                              className="h-auto w-full"
-                              loading={image.id === "hero" ? "eager" : "lazy"}
-                            />
-                          )}
-                        </button>
-                      ))}
-                    </div>
-                  </section>
-                ))}
-              </section>
+              <ProjectGallery
+                introComplete={introComplete}
+                projects={groupedImages}
+                onImageOpen={openImage}
+                onSectionMount={setSectionRef}
+              />
 
               <Sidebar
                 introComplete={introComplete}
@@ -202,173 +133,8 @@ export default function Home() {
           )}
         </div>
 
-        <AnimatePresence>
-          {!introComplete && (
-            <motion.section
-              key="intro"
-              className="fixed inset-0 z-50 grid place-items-center overflow-hidden bg-white"
-              aria-label="Portfolio opening"
-              exit={{ backgroundColor: "rgba(255,255,255,0)" }}
-              transition={{ duration: 0.95, ease: [0.76, 0, 0.24, 1] }}
-            >
-              <motion.img
-                layoutId="hero-image"
-                src="/images/hero.avif"
-                alt=""
-                className="absolute inset-0 h-full w-full object-cover"
-              />
-              <motion.h1
-                layoutId="brand-name"
-                className="relative px-6 text-center text-[clamp(3.5rem,13vw,14rem)] leading-[0.82] tracking-[-0.075em] text-white mix-blend-difference"
-              >
-                {brandName}
-              </motion.h1>
-            </motion.section>
-          )}
-        </AnimatePresence>
+        <IntroOverlay introComplete={introComplete} />
       </main>
     </LayoutGroup>
-  );
-}
-
-function Sidebar({
-  introComplete,
-  activeProject,
-  onProjectClick,
-}: {
-  introComplete: boolean;
-  activeProject: ProjectId;
-  onProjectClick: (projectId: ProjectId) => void;
-}) {
-  return (
-    <aside className="lg:sticky lg:top-5 lg:h-[calc(100vh-2.5rem)]">
-      <div className="flex h-full flex-col justify-between border-t border-stone-950 pt-3">
-        <div>
-          {introComplete ? (
-            <motion.h1
-              layoutId="brand-name"
-              className="text-[clamp(3.5rem,7vw,8.5rem)] leading-[0.82] tracking-[-0.075em]"
-            >
-              {brandName}
-            </motion.h1>
-          ) : (
-            <h1 className="text-[clamp(3.5rem,7vw,8.5rem)] leading-[0.82] tracking-[-0.075em] opacity-0">
-              {brandName}
-            </h1>
-          )}
-
-          <nav aria-label="Primary navigation" className="mt-8 flex gap-5 text-xl">
-            <Link href="/about" className="underline decoration-transparent hover:decoration-current">
-              About
-            </Link>
-            <Link href="/contact" className="underline decoration-transparent hover:decoration-current">
-              Contact
-            </Link>
-            <a
-              href="https://www.instagram.com/"
-              target="_blank"
-              rel="noreferrer"
-              className="underline decoration-transparent hover:decoration-current"
-            >
-              Instagram
-            </a>
-          </nav>
-        </div>
-
-        <nav aria-label="Projects" className="mt-12 text-xl lg:mt-0">
-          <p className="mb-4 text-sm uppercase tracking-[0.24em] text-stone-500">
-            Projects
-          </p>
-          <div className="flex flex-col items-start gap-2">
-            {projects.map((project) => (
-              <button
-                key={project.id}
-                type="button"
-                onClick={() => onProjectClick(project.id)}
-                className={`text-left underline-offset-4 ${
-                  activeProject === project.id
-                    ? "underline"
-                    : "text-stone-500 hover:text-stone-950"
-                }`}
-              >
-                {project.title}
-              </button>
-            ))}
-          </div>
-        </nav>
-      </div>
-    </aside>
-  );
-}
-
-function ImageViewer({
-  image,
-  projectTitle,
-  onClose,
-}: {
-  image: ImageEntry;
-  projectTitle: string;
-  onClose: () => void;
-}) {
-  return (
-    <>
-      <section className="grid min-h-[calc(100vh-2.5rem)] place-items-center bg-white">
-        <img
-          src={image.src}
-          alt={image.alt}
-          className="max-h-[calc(100vh-2.5rem)] w-full object-contain"
-        />
-      </section>
-
-      <aside className="border-t border-stone-950 pt-3 lg:sticky lg:top-5 lg:h-[calc(100vh-2.5rem)]">
-        <div className="flex h-full flex-col justify-between">
-          <div>
-            <button
-              type="button"
-              onClick={onClose}
-              className="mb-8 text-xl underline decoration-transparent underline-offset-4 hover:decoration-current focus:outline-none focus-visible:ring-2 focus-visible:ring-stone-950 focus-visible:ring-offset-4"
-            >
-              Close
-            </button>
-            <h1 className="text-[clamp(3.5rem,7vw,8.5rem)] leading-[0.82] tracking-[-0.075em]">
-              {brandName}
-            </h1>
-          </div>
-
-          <dl className="mt-12 grid gap-4 text-xl">
-            <div>
-              <dt className="text-sm uppercase tracking-[0.24em] text-stone-500">
-                Project
-              </dt>
-              <dd>{projectTitle}</dd>
-            </div>
-            <div>
-              <dt className="text-sm uppercase tracking-[0.24em] text-stone-500">
-                Date
-              </dt>
-              <dd>{image.date}</dd>
-            </div>
-            <div>
-              <dt className="text-sm uppercase tracking-[0.24em] text-stone-500">
-                Place
-              </dt>
-              <dd>{image.place}</dd>
-            </div>
-            <div>
-              <dt className="text-sm uppercase tracking-[0.24em] text-stone-500">
-                Medium
-              </dt>
-              <dd>{image.medium}</dd>
-            </div>
-            <div>
-              <dt className="text-sm uppercase tracking-[0.24em] text-stone-500">
-                Note
-              </dt>
-              <dd>{image.note}</dd>
-            </div>
-          </dl>
-        </div>
-      </aside>
-    </>
   );
 }

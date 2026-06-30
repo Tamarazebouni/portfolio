@@ -10,8 +10,19 @@ const garamondPremier = EB_Garamond({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://tamarazebouni.com"),
   title: "Tamara Pio Zebouni",
   description: "Image portfolio of Tamara Pio Zebouni.",
+  alternates: {
+    canonical: "/",
+  },
+  openGraph: {
+    title: "Tamara Pio Zebouni",
+    description: "Image portfolio of Tamara Pio Zebouni.",
+    url: "https://tamarazebouni.com",
+    siteName: "Tamara Pio Zebouni",
+    type: "website",
+  },
 };
 
 export default function RootLayout({

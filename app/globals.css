@@ -1,20 +1,49 @@
 @import "tailwindcss";
 
 :root {
-  --background: #f7f5f1;
-  --foreground: #171717;
+  --background: #ffffff;
+  --foreground: #000000;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-cardo);
+  --font-sans: var(--font-garamond-premier);
+  --font-editorial: var(--font-garamond-premier);
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: var(--font-cardo), Georgia, serif;
+  font-family: var(--font-garamond-premier), "EB Garamond", Georgia, serif;
+}
+
+.editorial-heading {
+  font-family: var(--font-garamond-premier), "EB Garamond", Georgia, serif;
+  font-size: clamp(0.9375rem, 0.875rem + 0.24vw, 1.125rem);
+  font-weight: 400;
+  letter-spacing: 0.075em;
+  line-height: 1.4;
+  color: var(--foreground);
+}
+
+.editorial-identity-disciplines {
+  font-family: var(--font-garamond-premier), "EB Garamond", Georgia, serif;
+  font-size: clamp(0.875rem, 0.82rem + 0.18vw, 1rem);
+  font-weight: 500;
+  letter-spacing: 0.09em;
+  line-height: 1.45;
+  white-space: nowrap;
+  color: #000000;
+}
+
+.editorial-contact-link {
+  font-family: var(--font-garamond-premier), "EB Garamond", Georgia, serif;
+  font-size: 0.75rem;
+  font-weight: 400;
+  letter-spacing: 0.08em;
+  line-height: 1.55;
+  color: #000000;
 }
 
 html {

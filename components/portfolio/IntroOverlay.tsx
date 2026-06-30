@@ -12,7 +12,7 @@ export function IntroOverlay({ introComplete }: { introComplete: boolean }) {
           key="intro"
           className="fixed inset-0 z-50 grid place-items-center overflow-hidden bg-background"
           aria-label="Portfolio opening"
-          exit={{ backgroundColor: "rgba(247, 245, 241, 0)" }}
+          exit={{ backgroundColor: "rgba(255, 255, 255, 0)" }}
           transition={{ duration: 0.95, ease: [0.76, 0, 0.24, 1] }}
         >
           <motion.img
@@ -23,7 +23,7 @@ export function IntroOverlay({ introComplete }: { introComplete: boolean }) {
           />
           <BrandMark
             sharedLayout
-            className="relative px-6 text-center text-[clamp(1.05rem,3.9vw,4.2rem)] leading-[0.82] tracking-[-0.075em] text-white mix-blend-difference"
+            className="relative px-6 text-center editorial-heading text-[clamp(0.875rem,2.5vw,1.5rem)] tracking-[0.12em] text-white mix-blend-difference"
           />
         </motion.section>
       )}

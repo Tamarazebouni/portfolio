@@ -1,26 +1,20 @@
 "use client";
 
 import { LayoutGroup } from "motion/react";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 
 import { ImageViewer } from "@/components/portfolio/ImageViewer";
 import { IntroOverlay } from "@/components/portfolio/IntroOverlay";
 import { ProjectGallery } from "@/components/portfolio/ProjectGallery";
 import { Sidebar } from "@/components/portfolio/Sidebar";
 import { imageEntries, type ImageEntry } from "@/data/images";
-import { projects, type ProjectId } from "@/data/projects";
-
+import { projects } from "@/data/projects";
 
 export default function Home() {
   const [introComplete, setIntroComplete] = useState(false);
-  const [activeProject, setActiveProject] = useState<ProjectId>(projects[0].id);
-  const [selectedImageIndex, setSelectedImageIndex] = useState<number | null>(null);
-  const sectionRefs = useRef<Record<ProjectId, HTMLElement | null>>({
-    "field-notes": null,
-    "quiet-rooms": null,
-    "surface-studies": null,
-    "after-light": null,
-  });
+  const [selectedImageIndex, setSelectedImageIndex] = useState<number | null>(
+    null,
+  );
 
   const groupedImages = useMemo(
     () =>
@@ -35,46 +29,10 @@ export default function Home() {
   const selectedImageNumber =
     selectedImageIndex === null ? 0 : selectedImageIndex + 1;
 
-  const setSectionRef = useCallback(
-    (projectId: ProjectId, node: HTMLElement | null) => {
-      sectionRefs.current[projectId] = node;
-    },
-    [],
-  );
-
   useEffect(() => {
     const timer = window.setTimeout(() => setIntroComplete(true), 1100);
 
     return () => window.clearTimeout(timer);
-  }, []);
-
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      (entries) => {
-        const visible = entries
-          .filter((entry) => entry.isIntersecting)
-          .sort((a, b) => b.intersectionRatio - a.intersectionRatio)[0];
-
-        if (visible?.target.id) {
-          setActiveProject(visible.target.id as ProjectId);
-        }
-      },
-      {
-        rootMargin: "-20% 0px -55% 0px",
-        threshold: [0.1, 0.35, 0.6],
-      },
-    );
-
-    Object.values(sectionRefs.current).forEach((section) => {
-      if (section) observer.observe(section);
-    });
-
-    return () => observer.disconnect();
-  }, [introComplete]);
-
-  const scrollToProject = useCallback((projectId: ProjectId) => {
-    setSelectedImageIndex(null);
-    sectionRefs.current[projectId]?.scrollIntoView({ block: "start" });
   }, []);
 
   const openImage = useCallback((image: ImageEntry) => {
@@ -101,8 +59,8 @@ export default function Home() {
 
   return (
     <LayoutGroup>
-      <main className="min-h-screen bg-background text-stone-950">
-        <div className="grid min-h-screen grid-cols-1 gap-5 px-5 py-5 lg:grid-cols-[minmax(0,1fr)_minmax(11rem,15rem)] lg:gap-8 lg:px-8">
+      <main className="min-h-screen bg-background text-foreground">
+        <div className="grid min-h-screen grid-cols-1 gap-5 px-5 py-5 lg:grid-cols-[minmax(0,1fr)_auto] lg:gap-16 lg:px-10 lg:py-8">
           {selectedImage ? (
             <ImageViewer
               image={selectedImage}
@@ -122,14 +80,9 @@ export default function Home() {
                 introComplete={introComplete}
                 projects={groupedImages}
                 onImageOpen={openImage}
-                onSectionMount={setSectionRef}
               />
 
-              <Sidebar
-                introComplete={introComplete}
-                activeProject={activeProject}
-                onProjectClick={scrollToProject}
-              />
+              <Sidebar introComplete={introComplete} />
             </>
           )}
         </div>

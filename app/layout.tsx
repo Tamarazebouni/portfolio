@@ -1,10 +1,10 @@
 import type { Metadata } from "next";
-import { Cardo } from "next/font/google";
+import { EB_Garamond } from "next/font/google";
 import "./globals.css";
 
-const cardo = Cardo({
-  variable: "--font-cardo",
-  weight: ["400", "700"],
+const garamondPremier = EB_Garamond({
+  variable: "--font-garamond-premier",
+  weight: ["400", "500"],
   style: ["normal", "italic"],
   subsets: ["latin"],
 });
@@ -20,7 +20,10 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`${cardo.variable} h-full antialiased`}>
+    <html
+      lang="en"
+      className={`${garamondPremier.variable} h-full antialiased`}
+    >
       <body className="min-h-full flex flex-col">{children}</body>
     </html>
   );

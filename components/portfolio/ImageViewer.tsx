@@ -17,10 +17,8 @@ type ImageViewerProps = {
   onClose: () => void;
 };
 
-const brandClassName =
-  "text-[clamp(1.05rem,2.1vw,2.55rem)] leading-[0.82] tracking-[-0.075em]";
 const textButtonClassName =
-  "underline decoration-transparent underline-offset-4 hover:decoration-current focus:outline-none focus-visible:ring-2 focus-visible:ring-stone-950 focus-visible:ring-offset-4";
+  "editorial-heading underline decoration-transparent underline-offset-4 hover:decoration-current focus:outline-none focus-visible:ring-2 focus-visible:ring-foreground focus-visible:ring-offset-4";
 
 export function ImageViewer({
   image,
@@ -72,33 +70,25 @@ export function ImageViewer({
             <button
               type="button"
               onClick={onClose}
-              className={`mb-8 text-xl ${textButtonClassName}`}
+              className={`mb-8 ${textButtonClassName}`}
             >
               Close
             </button>
-            <div className="mb-8 flex flex-col items-start gap-2 text-xl">
-              <button
-                type="button"
-                onClick={onPrevious}
-                className={textButtonClassName}
-              >
+            <div className="mb-8 flex flex-col items-start gap-2">
+              <button type="button" onClick={onPrevious} className={textButtonClassName}>
                 Previous
               </button>
-              <button
-                type="button"
-                onClick={onNext}
-                className={textButtonClassName}
-              >
+              <button type="button" onClick={onNext} className={textButtonClassName}>
                 Next
               </button>
-              <p className="pt-2 text-sm uppercase tracking-[0.24em] text-stone-500">
+              <p className="editorial-identity-disciplines pt-2">
                 {imageNumber} / {totalImages}
               </p>
             </div>
-            <BrandMark className={brandClassName} />
+            <BrandMark className="editorial-heading" />
           </div>
 
-          <dl className="mt-12 grid gap-4 text-xl">
+          <dl className="editorial-heading mt-12 grid gap-4">
             <ImageMetaItem label="Project" value={projectTitle} />
             <ImageMetaItem label="Date" value={image.date} />
             <ImageMetaItem label="Place" value={image.place} />
@@ -114,10 +104,8 @@ export function ImageViewer({
 function ImageMetaItem({ label, value }: { label: string; value: string }) {
   return (
     <div>
-      <dt className="text-sm uppercase tracking-[0.24em] text-stone-500">
-        {label}
-      </dt>
-      <dd>{value}</dd>
+      <dt className="editorial-identity-disciplines">{label}</dt>
+      <dd className="editorial-heading">{value}</dd>
     </div>
   );
 }

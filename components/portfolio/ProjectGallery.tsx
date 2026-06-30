@@ -4,8 +4,9 @@
 
 import { motion } from "motion/react";
 
+import { BrandMark } from "@/components/portfolio/BrandMark";
 import type { ImageEntry } from "@/data/images";
-import type { Project, ProjectId } from "@/data/projects";
+import type { Project } from "@/data/projects";
 
 export type ProjectWithImages = Project & {
   images: ImageEntry[];
@@ -15,24 +16,22 @@ type ProjectGalleryProps = {
   introComplete: boolean;
   projects: ProjectWithImages[];
   onImageOpen: (image: ImageEntry) => void;
-  onSectionMount: (projectId: ProjectId, node: HTMLElement | null) => void;
 };
 
 export function ProjectGallery({
   introComplete,
   projects,
   onImageOpen,
-  onSectionMount,
 }: ProjectGalleryProps) {
   return (
     <section aria-label="Image projects" className="min-w-0">
-      {projects.map((project) => (
+      {projects.map((project, index) => (
         <ProjectSection
           key={project.id}
           introComplete={introComplete}
+          isFirst={index === 0}
           project={project}
           onImageOpen={onImageOpen}
-          onSectionMount={onSectionMount}
         />
       ))}
     </section>
@@ -41,31 +40,41 @@ export function ProjectGallery({
 
 type ProjectSectionProps = {
   introComplete: boolean;
+  isFirst: boolean;
   project: ProjectWithImages;
   onImageOpen: (image: ImageEntry) => void;
-  onSectionMount: (projectId: ProjectId, node: HTMLElement | null) => void;
 };
 
 function ProjectSection({
   introComplete,
+  isFirst,
   project,
   onImageOpen,
-  onSectionMount,
 }: ProjectSectionProps) {
   return (
-    <section
-      id={project.id}
-      ref={(node) => onSectionMount(project.id, node)}
-      className="scroll-mt-5 pb-14"
-    >
-      <div className="mb-5">
-        <h2 className="text-[clamp(0.675rem,2.1vw,2.1rem)] leading-[0.86] tracking-[-0.06em]">
-          {project.title}
-        </h2>
-        <p className="mt-3 max-w-xl text-lg italic leading-snug text-stone-600">
+    <section id={project.id} className="scroll-mt-5 pb-20">
+      <header className="mb-12 pb-2 lg:pl-8 xl:pl-12">
+        {isFirst ? (
+          <>
+            <span className="sr-only">{project.title}</span>
+            <BrandMark
+              className={`editorial-heading transition-opacity duration-700 ${
+                introComplete ? "opacity-100" : "opacity-0"
+              }`}
+              sharedLayout={introComplete}
+            />
+          </>
+        ) : (
+          <h2 className="editorial-heading lg:pl-8 xl:pl-12">
+            {project.title}
+          </h2>
+        )}
+      </header>
+      {!isFirst && project.description ? (
+        <p className="editorial-identity-disciplines mb-8 max-w-sm">
           {project.description}
         </p>
-      </div>
+      ) : null}
       <div className="columns-1 gap-5 md:columns-2 *:mb-5">
         {project.images.map((image) => (
           <ImageTile

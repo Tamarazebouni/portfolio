@@ -30,7 +30,7 @@ export default function Home() {
     selectedImageIndex === null ? 0 : selectedImageIndex + 1;
 
   useEffect(() => {
-    const timer = window.setTimeout(() => setIntroComplete(true), 1100);
+    const timer = window.setTimeout(() => setIntroComplete(true), 5000);
 
     return () => window.clearTimeout(timer);
   }, []);

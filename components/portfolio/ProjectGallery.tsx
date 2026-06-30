@@ -2,8 +2,6 @@
 
 /* eslint-disable @next/next/no-img-element -- The masonry grid needs each AVIF's intrinsic rendered height. */
 
-import { motion } from "motion/react";
-
 import { BrandMark } from "@/components/portfolio/BrandMark";
 import type { ImageEntry } from "@/data/images";
 import type { Project } from "@/data/projects";
@@ -61,7 +59,6 @@ function ProjectSection({
               className={`editorial-heading transition-opacity duration-700 ${
                 introComplete ? "opacity-100" : "opacity-0"
               }`}
-              sharedLayout={introComplete}
             />
           </>
         ) : (
@@ -80,7 +77,6 @@ function ProjectSection({
           <ImageTile
             key={image.id}
             image={image}
-            introComplete={introComplete}
             onOpen={onImageOpen}
           />
         ))}
@@ -91,11 +87,10 @@ function ProjectSection({
 
 type ImageTileProps = {
   image: ImageEntry;
-  introComplete: boolean;
   onOpen: (image: ImageEntry) => void;
 };
 
-function ImageTile({ image, introComplete, onOpen }: ImageTileProps) {
+function ImageTile({ image, onOpen }: ImageTileProps) {
   return (
     <button
       type="button"
@@ -103,21 +98,12 @@ function ImageTile({ image, introComplete, onOpen }: ImageTileProps) {
       className="block w-full break-inside-avoid text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-stone-950 focus-visible:ring-offset-4"
       aria-label={`Open ${image.alt}`}
     >
-      {image.id === "hero" && introComplete ? (
-        <motion.img
-          layoutId="hero-image"
-          src={image.src}
-          alt={image.alt}
-          className="h-auto w-full"
-        />
-      ) : (
-        <img
-          src={image.src}
-          alt={image.alt}
-          className="h-auto w-full"
-          loading={image.id === "hero" ? "eager" : "lazy"}
-        />
-      )}
+      <img
+        src={image.src}
+        alt={image.alt}
+        className="h-auto w-full"
+        loading={image.id === "hero" ? "eager" : "lazy"}
+      />
     </button>
   );
 }
